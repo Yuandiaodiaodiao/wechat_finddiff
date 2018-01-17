@@ -27,9 +27,9 @@ def duibi(imagex,a=1.2,b=100):
             for c in range(3):
                 color=imagex[i,j][c]+imagex[i,j][c]*a+b
                 if color>25:
-                    dst[i,j][0]=random.randrange(0,255)
-                    dst[i,j][1]=random.randrange(0,255)
-                    dst[i,j][2]=255
+                    dst[i,j][0]=255 #红色
+                    dst[i,j][1]=random.randrange(0,100)#绿色
+                    dst[i,j][2]=random.randrange(0,50) #蓝色
                 elif color<25:
 
                     dst[i,j]=image2[i,j]
@@ -74,11 +74,28 @@ def on_press(event):
         print(0)
         return
     fig = event.inaxes.figure
-    ax = fig.add_subplot(122)
 
-    ax.imshow(image1, cmap="gray")
-    print(event.xdata)
-    ax1.scatter(event.xdata, event.ydata)
+    #print("modes",modes)
+
+    #print(event.xdata)
+    #print(event.ydata)
+    xp=event.xdata*4
+    yp=event.ydata*4
+    if "1" in modes:
+        xp+=214
+        #print("加前",yp)
+        yp+=166
+        #print("加后",yp)
+    else:
+        #print("else modes=",modes)
+        xp+=199
+        yp+=97
+    print(xp,yp)
+    cmd = 'adb shell input tap {x1} {y1} '.format(
+        x1=xp,
+        y1=yp
+    )
+    os.popen(cmd)
     plt.axis("off")
     fig.canvas.draw()
 def thumbnail_string(buf, size=(50, 50)):
@@ -92,7 +109,8 @@ def thumbnail_string(buf, size=(50, 50)):
         return o.getvalue()
 
 if __name__=="__main__":
-
+    global modes
+    modes=input("输入 1 闯关和每日挑战 2 随机匹配\n")
     while 1:
         pull_screenshot()
 
@@ -106,12 +124,17 @@ if __name__=="__main__":
         # img = cv2.cvtColor(numpy.asarray(img), cv2.COLOR_RGB2BGR)
         global image1
         global image2
-        image1=img[97:921:4,199:1023:4]
-        image2=img[997:1821:4,199:1023:4]
-        # plt.subplot(231),plt.imshow(image1)
+        if "2" in modes:
+            image1=img[97:921:4,199:1023:4]
+            image2=img[997:1821:4,199:1023:4]
+        else:
+            image1 = img[166:990:4, 214:1038:4]
+            image2 = img[1027:1851:4, 214:1038:4]
+
+
         # plt.subplot(232),plt.imshow(image2)
-        # plt.show()
-        diff=cv2.absdiff(image2,image1)
+
+        diff=cv2.absdiff(image1,image2)
     # plt.close()
 
 
@@ -125,13 +148,23 @@ if __name__=="__main__":
         #         if fanse[i][j][1]==255:
         #             fanse[i][j]=image2[i][j]
         #overlapping = cv2.addWeighted(fanse, 0.8, image1, 0.2, 0)
-        cv2.namedWindow("找不同",cv2.WINDOW_NORMAL )
-        cv2.imshow("找不同",fanse)
-        cv2.waitKey(0)
+        # cv2.namedWindow("找不同",cv2.WINDOW_NORMAL )
+        # cv2.imshow("找不同",fanse)
+        # cv2.waitKey(0)
+        fig = plt.figure()
+        fig.canvas.mpl_connect("button_press_event", on_press)
+        plt.subplot(121), plt.imshow(img)
+        # plt.subplot(122),plt.imshow(fanse)
+        ax1 = fig.add_subplot(122)
+        ax1.imshow(fanse)
+        plt.axis("off")
+        plt.show()
+        
+        
+        plt.close()
+        print("继续运行")
         # print("233")
-        # fig=plt.figure()
-        # fig.canvas.mpl_connect("button_press_event", on_press)
-        # ax1 = fig.add_subplot(121)
-        # ax1.imshow(fanse)
-        # plt.axis("off")
+
+
+
         # plt.show()
